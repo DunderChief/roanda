@@ -2,10 +2,10 @@
 \alias{marketOrder}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+  ~~function to do ... ~~
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
 marketOrder(instrument = "EUR_USD", units = 10000, side, slippage = 2, SL = 10, TP = 10, acct, auth_id, acct_type = "fxpractice")
@@ -13,57 +13,57 @@ marketOrder(instrument = "EUR_USD", units = 10000, side, slippage = 2, SL = 10, 
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{instrument}{
-%%     ~~Describe \code{instrument} here~~
+     ~~Describe \code{instrument} here~~
 }
   \item{units}{
-%%     ~~Describe \code{units} here~~
+     ~~Describe \code{units} here~~
 }
   \item{side}{
-%%     ~~Describe \code{side} here~~
+     ~~Describe \code{side} here~~
 }
   \item{slippage}{
-%%     ~~Describe \code{slippage} here~~
+     ~~Describe \code{slippage} here~~
 }
   \item{SL}{
-%%     ~~Describe \code{SL} here~~
+     ~~Describe \code{SL} here~~
 }
   \item{TP}{
-%%     ~~Describe \code{TP} here~~
+     ~~Describe \code{TP} here~~
 }
   \item{acct}{
-%%     ~~Describe \code{acct} here~~
+     ~~Describe \code{acct} here~~
 }
   \item{auth_id}{
-%%     ~~Describe \code{auth_id} here~~
+     ~~Describe \code{auth_id} here~~
 }
   \item{acct_type}{
-%%     ~~Describe \code{acct_type} here~~
+     ~~Describe \code{acct_type} here~~
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+  ~Describe the value returned
+  If it is a LIST, use
+  \item{comp1 }{Description of 'comp1'}
+  \item{comp2 }{Description of 'comp2'}
+ ...
 }
 \references{
-%% ~put references to the literature/web site here ~
+ ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+  ~~who you are~~
 }
 \note{
-%%  ~~further notes~~
+  ~~further notes~~
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+ ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+ ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
