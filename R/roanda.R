@@ -47,9 +47,9 @@ getPipValue <- function(instrument='EUR_USD', acct, auth_id, acct_type='fxpracti
 }
 
 
-#######################
-##  Get Open Orders  ##
-#######################
+##########################
+##  Get Open Positions  ##
+##########################
 getPositions <- function(instrument, acct, auth_id, acct_type='fxpractice')
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
@@ -57,6 +57,18 @@ getPositions <- function(instrument, acct, auth_id, acct_type='fxpractice')
                 acct, '/positions?instrument=', instrument)
   orders <- fromJSON(getURL(url, httpheader=auth))$positions
   return(orders)
+}
+
+#######################
+##  Get Open Trades  ##
+#######################
+getOpenTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
+{
+  auth <- c(Authorization=paste('Bearer', auth_id))
+  url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
+                acct, '/trades?instrument=', instrument)
+  trades <- fromJSON(getURL(url, httpheader=auth))$trades
+  return(trades)
 }
 
 
