@@ -71,9 +71,9 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
   # If no trades open, exit
   if(length(trades)==0) return(trades)
   # convert to xts
-  trades$side <- 0
   trades$side[trades$side=='buy'] <- 1
   trades$side[trades$side=='sell'] <- -1
+  trades$side <- as.integer(trades$side)
   time <- as.POSIXct(trades$time, format='%Y-%m-%dT%H:%M:%S')
   trades <- subset(trades, select= -c(instrument, time))
   trades <- xts(trades, order.by=time)
