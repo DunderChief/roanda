@@ -68,6 +68,13 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/trades?instrument=', instrument)
   trades <- fromJSON(getURL(url, httpheader=auth))$trades
+  # convert to xts
+  trades$side <- 0
+  trades$side[trades$side=='buy'] <- 1
+  trades$side[trades$side=='sell'] <- -1
+  time <- as.POSIXct(trades$time, format='%Y-%m-%dT%H:%M:%S')
+  trades <- subset(trades, select= -c(instrument, time))
+  trades <- xts(trades, order.by=time)
   return(trades)
 }
 
