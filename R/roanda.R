@@ -82,9 +82,9 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
 
 
 ####################
-##  Close Orders  ##
+##  Close Trades  ##
 ####################
-closeAllOrders <- function(instrument, acct, auth_id, acct_type='fxpractice')
+closeAllTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
@@ -92,6 +92,16 @@ closeAllOrders <- function(instrument, acct, auth_id, acct_type='fxpractice')
   closed <- fromJSON(getURL(url, httpheader=auth, customrequest='DELETE'))
   return(closed)
 }
+
+closeTrade <- function(orderID, acct, auth_id, acct_type='fxpractice')
+{
+  auth <- c(Authorization=paste('Bearer', auth_id))
+  url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
+                acct, '/trades/', orderID) 
+  closed <- fromJSON(getURL(url, httpheader=auth, customrequest='DELETE'))
+  return(closed)
+}
+  
 #########################
 ##  Get Past N Orders  ##
 #########################
