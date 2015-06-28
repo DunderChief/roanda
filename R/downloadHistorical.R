@@ -10,7 +10,8 @@ getHistorical <- function(
   end.time=Sys.Date(),
   granularity='M1',
   acct=727313,
-  auth_id='414ffc620fc8932dde851e20b7d67e86-e9526690bcc14965de0dda51d800ae65')
+  auth_id='414ffc620fc8932dde851e20b7d67e86-e9526690bcc14965de0dda51d800ae65',
+  acct_type='fxpractice')
 {
   
   ##  We want to get the 30 second data from July 1, 2013 - July 12, 2014,
@@ -46,7 +47,7 @@ getHistorical <- function(
     end.f <- gsub(':', '%3A', end.f)
 
     out <- getCandlesByTime(instrument=instrument, granularity=granularity, 
-                            start=start.f, end=end.f, auth_id=auth_id)
+                            start=start.f, end=end.f, auth_id=auth_id, acct_type=acct_type)
     Sys.sleep(0.1)
     return(as.data.frame(out))
   }
@@ -56,4 +57,17 @@ getHistorical <- function(
   dat_2 <- do.call(rbind, dat_2)
   dat <- xts(dat_2, order.by=as.POSIXct(rownames(dat_2), format='%Y-%m-%d %H:%M:%S', tz='UTC'))
   return(dat)
+}
+
+# Takes an xts object and downloads appends new candles up to current date
+updateHistorical <- function(dat.xts, instrument='EUR_USD', granularity='H1') {
+  library(roanda)
+  start <- floor_date(index(xts::last(dat.xts)), 'day')
+  newdata <- getHistorical(instrument, 
+                           start.time=as.character(start), 
+                           end.time=Sys.Date(),
+                           granularity='H1')
+  updated <- rbind(dat.xts, newdata)
+  updated <- updated[!duplicated(index(updated)),]
+  return(updated)
 }
