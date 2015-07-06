@@ -8,7 +8,7 @@ options(RCurlOptions=list(cainfo = system.file("CurlSSL", "cacert.pem", package 
 ##################
 ##  Get Equity  ##
 ##################
-getEquity <- function(acct, auth_id, acct_type='fxpractice') 
+getEquity <- function(acct, auth_id, acct_type) 
 {
   ##  Athorization
   auth <- c(Authorization=paste('Bearer', auth_id))
@@ -22,7 +22,7 @@ getEquity <- function(acct, auth_id, acct_type='fxpractice')
 #################
 ##  Get Price  ## 
 #################
-getPrice <- function(instrument='EUR_USD', auth_id, acct_type='fxpractice')
+getPrice <- function(instrument='EUR_USD', auth_id, acct_type)
 {
   ##  Athorization
   auth <- c(Authorization=paste('Bearer', auth_id))
@@ -37,7 +37,7 @@ getPrice <- function(instrument='EUR_USD', auth_id, acct_type='fxpractice')
 #####################
 ##  Get pip value  ##
 #####################
-getPipValue <- function(instrument='EUR_USD', acct, auth_id, acct_type='fxpractice')
+getPipValue <- function(instrument='EUR_USD', acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/instruments?accountId=',
@@ -50,7 +50,7 @@ getPipValue <- function(instrument='EUR_USD', acct, auth_id, acct_type='fxpracti
 ##########################
 ##  Get Open Positions  ##
 ##########################
-getPositions <- function(instrument, acct, auth_id, acct_type='fxpractice')
+getPositions <- function(instrument, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
@@ -62,7 +62,7 @@ getPositions <- function(instrument, acct, auth_id, acct_type='fxpractice')
 #######################
 ##  Get Open Trades  ##
 #######################
-getOpenTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
+getOpenTrades <- function(instrument, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
@@ -84,7 +84,7 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
 ####################
 ##  Close Trades  ##
 ####################
-closeAllTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
+closeAllTrades <- function(instrument, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
@@ -93,7 +93,7 @@ closeAllTrades <- function(instrument, acct, auth_id, acct_type='fxpractice')
   return(closed)
 }
 
-closeTrade <- function(orderID, acct, auth_id, acct_type='fxpractice')
+closeTrade <- function(orderID, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
@@ -109,7 +109,7 @@ getPastOrders <- function(instrument='EUR_USD',
                           count=1, 
                           acct, 
                           auth_id, 
-                          acct_type='fxpractice'
+                          acct_type
 )
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
@@ -129,7 +129,7 @@ pastCandles <- function(instrument='EUR_USD',
                         candleFormat='bidask',
                         isAsk=TRUE, ##  Do you want the bid or ask prices
                         auth_id,
-                        acct_type='fxpractice'
+                        acct_type
 )
 {
   require(xts)
@@ -170,7 +170,7 @@ getCandlesByTime <- function(instrument='EUR_USD',
                              candleFormat='bidask',
                              isAsk=TRUE, ##  Do you want the bid or ask prices
                              auth_id,
-                             acct_type='fxpractice'
+                             acct_type
 )
 {
   
@@ -219,15 +219,15 @@ marketOrder <- function(instrument='EUR_USD',
                         #trailingStop, ## Not supported yet
                         acct,
                         auth_id,
-                        acct_type='fxpractice'
+                        acct_type
 )
 {
   ##  Set order type to 'market'
   type <- 'market'
   
   ##  Get market price and pip value
-  curr_price <- getPrice('EUR_USD', auth_id=auth_id)
-  pip_value <- getPipValue('EUR_USD', auth_id=auth_id, acct=acct)
+  curr_price <- getPrice('EUR_USD', auth_id=auth_id, acct_type=acct_type)
+  pip_value <- getPipValue('EUR_USD', auth_id=auth_id, acct=acct, acct_type=acct_type)
   
   ##  Convert TP and SL to price values
   if(side=='buy'){
@@ -243,6 +243,8 @@ marketOrder <- function(instrument='EUR_USD',
   } else {
     stop('Need to specify whether to Buy or Sell')
   }
+  
+  if(!stopLoss > 0) stop('No stop loss value!')
   
   ##  Athorization
   auth <- c(Authorization=paste('Bearer', auth_id))
