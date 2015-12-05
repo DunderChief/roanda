@@ -2,8 +2,35 @@ options(stringsAsFactors=FALSE)
 library(xts)
 library(quantmod)
 library(roanda)
-source('code/Cluster_by_Hour/Implementation_functions.R')
+library(lubridate)
 Sys.setenv(TZ='UTC')
+
+# Return whether the current time is in undesireable trading hours
+isWeekend <- function() {
+  systime <- Sys.time()
+  this.day <- wday(systime)
+  this.hour <- hour(systime)
+  return(this.day %in% c(1,7) |           # Sat. or Sun. or...
+         (this.day==6 & this.hour > 13) | # Fridays after 9am
+         (this.day==2 & this.hour < 7)    # Monday before 3 am
+  )   
+}
+
+
+# Return whether there's a fresh candle on my timescale
+detectNewCandle <- function(timeframe='H1', acct_type, acct, auth_id) {
+  this.day <- wday(systime)
+  this.hour <- hour(systime)
+  this.minute <- minute(systime)
+  this.second <- as.integer(second(systime))
+
+  # The Meat --------------------------------------------------------------------------
+  this.minute == 0 & this.second==1 # Evaluate every hour
+  
+  isLastCandThere <- (floor_date(Sys.time(), 'hour') - 60*60) == xts::last(index(hist))
+}
+
+  
 # Params -------------------------------------------------------------------------------
 # acct=522939
 # auth_id='5a5e826fd8fc396e0847de25dbba7d25-0c737c44d5c1019a8a2c5de7067fba69'
