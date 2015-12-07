@@ -2,7 +2,7 @@ library(xts)
 library(quantmod)
 library(lubridate)
 library(foreach)
-library(stringr)
+
 
 getHistorical <- function(
   instrument='EUR_USD',
@@ -20,9 +20,9 @@ getHistorical <- function(
   options(stringsAsFactors=FALSE)
   
   # Split the granularity string
-  gran.num <- as.integer(str_extract(granularity, '[0-9]+'))
+  gran.num <- as.numeric(substring(granularity, 2, nchar(granularity)))
   if(is.na(gran.num)) gran.num <- 1
-  gran.time <- str_extract(granularity, '[A-Z]')
+  gran.time <- substring(granularity, 1, 1)
   
   gran.time <- switch(gran.time,
                      'S' = 'sec',
@@ -44,7 +44,7 @@ getHistorical <- function(
                              'hour' = 60*60,
                              'day' = 60*60*24,
                              'week' = 60*60*24*7)
-    end <- start + seconds(5000*sec_multiplier)
+    end <- start + seconds(5000*sec_multiplier*gran.num)
     start.f <- format(start, format='%Y-%m-%dT%H:%M:%SZ')
     end.f <- format(end, format='%Y-%m-%dT%H:%M:%SZ')
 
@@ -74,10 +74,14 @@ updateHistorical <- function(dat.xts, instrument='EUR_USD', granularity='H1', is
   # Subtract one day to avoid 00:00:00 where there may be no candles available yet
   start <- floor_date(index(xts::last(dat.xts)) - 60*60*24, 'day')
   newdata <- getHistorical(instrument, 
-                           start.time=as.character(start), 
+                           start.time=start, 
                            end.time=Sys.Date(),
-                           granularity='H1',
+                           granularity=granularity,
                            isAsk=isAsk)
+  if(is.na(newdata)){
+    warning('No candles returned for this time period, returning original dataset.')
+    return(dat.xts)
+  }
   updated <- rbind(dat.xts, newdata)
   updated <- updated[!duplicated(index(updated)),]
   return(updated)
