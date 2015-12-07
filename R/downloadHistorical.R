@@ -21,6 +21,7 @@ getHistorical <- function(
   
   # Split the granularity string
   gran.num <- as.integer(str_extract(granularity, '[0-9]+'))
+  if(is.na(gran.num)) gran.num <- 1
   gran.time <- str_extract(granularity, '[A-Z]')
   
   gran.time <- switch(gran.time,
@@ -31,7 +32,10 @@ getHistorical <- function(
                      'W' = 'week')
   
   # this is meant to break the total time into bins with 5000 points in between
-  start_dates <- seq.POSIXt(ymd(start.time), ymd(end.time), by=paste(5000*gran.num, gran.time))
+  if(!is.POSIXt(start.time)) start.time <- as.POSIXct(start.time)
+  if(!is.POSIXt(end.time)) end.time <- as.POSIXct(end.time)
+  
+  start_dates <- seq.POSIXt(start.time, end.time, by=paste(5000*gran.num, gran.time))
   
   dat <- foreach(start=start_dates) %do% {
     sec_multiplier <- switch(gran.time,
@@ -54,6 +58,10 @@ getHistorical <- function(
   }
   has.candles <- lapply(dat, function(xx) nrow(xx)!=1)
   has.candles <- do.call(c, has.candles)
+  if(sum(has.candles) < 1) {
+    warning('No candles found!!! Returning NA')
+    return(NA)
+  }
   dat_2 <- dat[has.candles]
   dat_2 <- do.call(rbind, dat_2)
   dat <- xts(dat_2, order.by=as.POSIXct(rownames(dat_2), format='%Y-%m-%d %H:%M:%S', tz='UTC'))

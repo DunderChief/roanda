@@ -3,9 +3,11 @@ library(xts)
 library(quantmod)
 library(roanda)
 library(lubridate)
+library(foreach)
 Sys.setenv(TZ='UTC')
 
 # Return whether the current time is in undesireable trading hours
+# ________________________________________________________________
 isWeekend <- function() {
   systime <- Sys.time()
   this.day <- wday(systime)
@@ -18,19 +20,47 @@ isWeekend <- function() {
 
 
 # Return whether there's a fresh candle on my timescale
-detectNewCandle <- function(timeframe='H1', acct_type, acct, auth_id) {
+# _____________________________________________________
+detectNewCandle <- function(instrument='EUR_USD', granularity='H1') {
+  systime <- Sys.time()
   this.day <- wday(systime)
   this.hour <- hour(systime)
   this.minute <- minute(systime)
   this.second <- as.integer(second(systime))
 
-  # The Meat --------------------------------------------------------------------------
-  this.minute == 0 & this.second==1 # Evaluate every hour
+  # Find the closest hour, minute, second, etc.
+  timestring <- substring(granularity, 1, 1)
+  timeint <- as.numeric(substring(granularity, 2, nchar(granularity)))
+  lub_time <- switch(timestring,
+                     'S' = 'second',
+                     'M' = 'minute',
+                     'H' = 'hour',
+                     'D' = 'day',
+                     'W' = 'week')
+  period_secs <- switch(timestring,
+                        'S' = 1,
+                        'M' = 60,
+                        'H' = 60*60,
+                        'D' = 60*60*24,
+                        'W' = 60*60*24*7)
+  # Some Oanda granularity have no int, there fore need to skip
+  if(!is.na(timeint)) period_secs <- period_secs * timeint
+  newCandleTime <- align.time(Sys.time(), period_secs, drop.time=FALSE)
   
-  isLastCandThere <- (floor_date(Sys.time(), 'hour') - 60*60) == xts::last(index(hist))
+  # Sleep until we're close to that time
+  sleep_dur <- difftime(newCandleTime-1, Sys.time(), units='secs')
+  if(sleep_dur > 1) Sys.sleep(sleep_dur)
+  
+  while(index(xts::last(historical)) < newCandleTime){
+    historical <- getHistorical(instrument, granularity=granularity,
+                                start.time=Sys.time()-(5*period_secs),
+                                end.time=newCandleTime)
+    Sys.sleep(.3)
+  }
+  
 }
 
-  
+
 # Params -------------------------------------------------------------------------------
 # acct=522939
 # auth_id='5a5e826fd8fc396e0847de25dbba7d25-0c737c44d5c1019a8a2c5de7067fba69'
