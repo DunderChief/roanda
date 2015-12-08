@@ -69,13 +69,15 @@ getHistorical <- function(
 }
 
 # Takes an xts object and downloads appends new candles up to current date
-updateHistorical <- function(dat.xts, instrument='EUR_USD', granularity='H1', isAsk=TRUE) {
+updateHistorical <- function(dat.xts, start, instrument='EUR_USD', granularity='H1', isAsk=TRUE) {
   library(roanda)
   # Subtract one day to avoid 00:00:00 where there may be no candles available yet
-  start <- floor_date(index(xts::last(dat.xts)) - 60*60*24, 'day')
+  if(missing(start)){
+    start <- floor_date(xts:::index.xts(xts::last(dat.xts)) - 60*60*24, 'day')
+  }
   newdata <- getHistorical(instrument, 
                            start.time=start, 
-                           end.time=Sys.Date(),
+                           end.time=Sys.Date() + 1,
                            granularity=granularity,
                            isAsk=isAsk)
   if(NCOL(newdata)==1){
@@ -83,6 +85,6 @@ updateHistorical <- function(dat.xts, instrument='EUR_USD', granularity='H1', is
     return(dat.xts)
   }
   updated <- rbind(dat.xts, newdata)
-  updated <- updated[!duplicated(index(updated)),]
+  updated <- updated[!duplicated(xts:::index.xts(updated)),]
   return(updated)
 }
