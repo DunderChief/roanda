@@ -57,9 +57,11 @@ updateCandles <- function(hist, instrument='EUR_USD', granularity='H1') {
   
     
   while(Sys.time() < newCandleTime) {
+    cat('waiting for correct time')
     Sys.sleep(.3)
   }
   while(index(xts::last(hist)) < (newCandleTime - period_secs)){
+    cat('getting new candles')
     hist <- updateHistorical(hist, instrument=instrument, granularity=granularity)
     Sys.sleep(.3)
   }

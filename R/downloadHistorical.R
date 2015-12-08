@@ -78,7 +78,7 @@ updateHistorical <- function(dat.xts, instrument='EUR_USD', granularity='H1', is
                            end.time=Sys.Date(),
                            granularity=granularity,
                            isAsk=isAsk)
-  if(is.na(newdata)){
+  if(NCOL(newdata)==1){
     warning('No candles returned for this time period, returning original dataset.')
     return(dat.xts)
   }
