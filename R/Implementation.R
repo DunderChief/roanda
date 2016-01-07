@@ -15,10 +15,12 @@ isWeekend <- function() {
 
 # Return whether there's a fresh candle on my timescale
 # _____________________________________________________
-updateCandles <- function(hist, instrument='EUR_USD', granularity='H1') {
+updateCandles <- function(hist, instrument='EUR_USD', granularity='H1', 
+                          acct, auth_id, acct_type) {
   # If historical data not supplied, get some
   if(missing(hist)) {
-    hist <- getHistorical(instrument=instrument, granularity=granularity)
+    hist <- getHistorical(instrument=instrument, granularity=granularity,
+                          acct=acct, auth_id=auth_id, acct_type=acct_type)
   }
   systime <- Sys.time()
   this.day <- wday(systime)
@@ -56,7 +58,8 @@ updateCandles <- function(hist, instrument='EUR_USD', granularity='H1') {
   
   while(xts:::index.xts(xts::last(hist)) < (newCandleTime - period_secs)){
     start <- xts:::index.xts(xts::last(hist)) - period_secs*4
-    hist <- updateHistorical(hist, start=start, instrument=instrument, granularity=granularity)
+    hist <- updateHistorical(hist, start=start, instrument=instrument, granularity=granularity,
+                             acct=acct, auth_id=auth_id, acct_type=acct_type)
     Sys.sleep(.3)
   }
   return(hist)
