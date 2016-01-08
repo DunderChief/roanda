@@ -196,7 +196,7 @@ getCandlesByTime <- function(instrument='EUR_USD',
     if(NROW(hist)!=0) break # We good, break loop
     Sys.sleep(.5)
   }
-  if(NROW(hist==0)) stop('Zero candles return 20 times in a row...')
+  if(NROW(hist)==0) stop('Zero candles return 20 times in a row...')
   if(isAsk){
     ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
                        Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)
@@ -206,7 +206,12 @@ getCandlesByTime <- function(instrument='EUR_USD',
   }
   
   ##  Convert to XTS object
-  dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+  tryCatch({
+    dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+  }, error=function(e) {
+    cat(hist)
+    stop('hist$time cant be converted to as.POSIXct for some reason in roanda::getCandlesByTime()')
+  })
   ohlc_xts <- xts(ohlc, order.by=dates)
   return(ohlc_xts)
 }
