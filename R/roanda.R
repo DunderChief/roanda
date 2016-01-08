@@ -164,7 +164,7 @@ pastCandles <- function(instrument='EUR_USD',
 ###########################
 getCandlesByTime <- function(instrument='EUR_USD',
                              granularity='M1', # Time frame S5, M1, H4, D, W, M, etc.
-                             start, ## '2013-01-01T00%3A00%3A00Z'
+                             start, ## '2014-06-19T15%3A47%3A40Z'
                              end,
                              includeFirst=TRUE, ## Include the first candle
                              candleFormat='bidask',
@@ -188,12 +188,15 @@ getCandlesByTime <- function(instrument='EUR_USD',
                     '&candleFormat=', candleFormat
   )
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/candles?', options)
-  
-  hist <- getURL(url, httpheader=auth)
-  if(hist=='') return('No Candles')
-  hist <- fromJSON(hist)$candles
-  hist <- hist[hist$complete==TRUE, ]
-  
+  for(iter in 1:20) {
+    hist <- getURL(url, httpheader=auth)
+    if(hist=='') next # We bad, start next loop
+    hist <- fromJSON(hist)$candles
+    hist <- hist[hist$complete==TRUE, ]
+    if(NROW(hist)!=0) break # We good, break loop
+    Sys.sleep(.5)
+  }
+  if(NROW(hist==0)) stop('Zero candles return 20 times in a row...')
   if(isAsk){
     ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
                        Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)
