@@ -67,7 +67,8 @@ updateCandles <- function(hist, instrument='EUR_USD', granularity='H1',
 
 # Returns the units needed given a stop loss and risk level 
 # _________________________________________________________
-getUnits <- function(instrument, current_price, stoploss, risk=.02)
+getUnits <- function(instrument, current_price, stoploss, risk=.02,
+                     acct, auth_id, acct_type)
 {
   pipvalue <- getPipValue(instrument, acct=acct, auth_id=auth_id, acct_type=acct_type)
   if(risk > .10) stop("Whoa there cowbody!!! Greater than 10% risk is more than this little function is willing to allow.")
