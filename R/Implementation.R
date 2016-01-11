@@ -67,14 +67,15 @@ updateCandles <- function(hist, instrument='EUR_USD', granularity='H1',
 
 # Returns the units needed given a stop loss and risk level 
 # _________________________________________________________
-getUnits <- function(instrument, current_price, stoploss, risk=.02,
-                     acct, auth_id, acct_type)
+getUnits <- function(instrument, current_price, stoploss, risk,
+                      acct, auth_id, acct_type)
 {
   pipvalue <- getPipValue(instrument, acct=acct, auth_id=auth_id, acct_type=acct_type)
   if(risk > .10) stop("Whoa there cowbody!!! Greater than 10% risk is more than this little function is willing to allow.")
   price <- as.vector(current_price)
+  cat('Current Price:', price)
   ##  Is USD the base currency (1st pair)?
-  isUSDbase <- which(strsplit(instrument, '_')[[1]] =='USD') == 1
+  isUSDbase <- substring(instrument, 1, 3) == 'USD'
   ##  How many units = 1 USD?
   units_per_dollar <- ifelse(isUSDbase, 
                              pipvalue * (1/price),
@@ -82,8 +83,11 @@ getUnits <- function(instrument, current_price, stoploss, risk=.02,
   eq <- getEquity(acct=acct, auth_id=auth_id, acct_type=acct_type)
   dollars_per_pip_to_risk <- eq * risk / stoploss  
   units <- dollars_per_pip_to_risk / units_per_dollar
+  cat('Units:', units, '| equity |', eq, '| dollars_per_pip_to_risk |', dollar_per_pip_to_risk, 
+      '|UnitsPerDoll|', units_per_dollar, '|class(units)|', class(units))
   # Set a cap of 1 million units
-  if(units > 1e6) units <- 1e6
+  if(units > 50000) stop('Unit cap of 50000 reached...')
+  if(units < 1000) stop('Number of units pitifly small...')
   return(as.integer(units))
 }
 
