@@ -221,7 +221,7 @@ getCandlesByTime <- function(instrument,
 marketOrder <- function(instrument,
                         units=10000, #number of units to buy
                         side, #buy, sell
-                        slippage=2, ## (pips)
+                        slippage=4, ## (pips)
                         SL=10, ## pips
                         TP=10, ## pips
                         #trailingStop, ## Not supported yet
@@ -236,6 +236,10 @@ marketOrder <- function(instrument,
   ##  Get market price and pip value
   curr_price <- getPrice(instrument, auth_id=auth_id, acct_type=acct_type)
   pip_value <- getPipValue(instrument, auth_id=auth_id, acct=acct, acct_type=acct_type)
+  
+  if(!is.numeric(curr_price$ask)) stop('Current ask price is not numeric for some reason')
+  if(!is.numeric(curr_price$bid)) stop('Current bid price is not numeric for some reason')
+  if(!is.numeric(pip_value)) stop('Pip value is not numeric for some reason')
   
   ##  Convert TP and SL to price values
   if(side=='buy'){
