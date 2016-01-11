@@ -22,7 +22,7 @@ getEquity <- function(acct, auth_id, acct_type)
 #################
 ##  Get Price  ## 
 #################
-getPrice <- function(instrument='EUR_USD', auth_id, acct_type)
+getPrice <- function(instrument, auth_id, acct_type)
 {
   ##  Athorization
   auth <- c(Authorization=paste('Bearer', auth_id))
@@ -37,7 +37,7 @@ getPrice <- function(instrument='EUR_USD', auth_id, acct_type)
 #####################
 ##  Get pip value  ##
 #####################
-getPipValue <- function(instrument='EUR_USD', acct, auth_id, acct_type)
+getPipValue <- function(instrument, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/instruments?accountId=',
@@ -105,7 +105,7 @@ closeTrade <- function(orderID, acct, auth_id, acct_type)
 #########################
 ##  Get Past N Orders  ##
 #########################
-getPastOrders <- function(instrument='EUR_USD',
+getPastOrders <- function(instrument,
                           count=1, 
                           acct, 
                           auth_id, 
@@ -123,7 +123,7 @@ getPastOrders <- function(instrument='EUR_USD',
 ##########################
 ##  Get Past N Candles  ##
 ##########################
-pastCandles <- function(instrument='EUR_USD',
+pastCandles <- function(instrument,
                         granularity, # Time frame S5, M1, H4, D, W, M, etc.
                         count,  ##  Number of candles -- max 5000
                         candleFormat='bidask',
@@ -162,7 +162,7 @@ pastCandles <- function(instrument='EUR_USD',
 ###########################
 ##  Get Historical Data  ##
 ###########################
-getCandlesByTime <- function(instrument='EUR_USD',
+getCandlesByTime <- function(instrument,
                              granularity='M1', # Time frame S5, M1, H4, D, W, M, etc.
                              start, ## '2014-06-19T15%3A47%3A40Z'
                              end,
@@ -218,7 +218,7 @@ getCandlesByTime <- function(instrument='EUR_USD',
 ##########################
 ##  Place Market Order  ##
 ##########################
-marketOrder <- function(instrument='EUR_USD',
+marketOrder <- function(instrument,
                         units=10000, #number of units to buy
                         side, #buy, sell
                         slippage=2, ## (pips)
@@ -234,8 +234,8 @@ marketOrder <- function(instrument='EUR_USD',
   type <- 'market'
   
   ##  Get market price and pip value
-  curr_price <- getPrice('EUR_USD', auth_id=auth_id, acct_type=acct_type)
-  pip_value <- getPipValue('EUR_USD', auth_id=auth_id, acct=acct, acct_type=acct_type)
+  curr_price <- getPrice(instrument, auth_id=auth_id, acct_type=acct_type)
+  pip_value <- getPipValue(instrument, auth_id=auth_id, acct=acct, acct_type=acct_type)
   
   ##  Convert TP and SL to price values
   if(side=='buy'){
