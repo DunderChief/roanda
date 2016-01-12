@@ -15,7 +15,7 @@ marketOrder('EUR_USD', units=1000, side='sell', SL = 100, TP=100, slippage=4,
 getPastOrders('EUR_USD', count=10, acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
 
 # Get open Trades
-openTrades <- getOpenTrades('EUR_USD', acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
+openTrades <- getOpenTrades('EUR_USD', acct=acct_buy, auth_id=auth_id, acct_type=acct_type)
 openTrades
 orderID <- as.vector(openTrades$id[1])
 closeTrade(orderID = orderID, acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
@@ -28,3 +28,10 @@ marketOrder('EUR_USD', units=1000, side='sell', SL = 100, TP=100, slippage=4,
             acct=acct_sell, auth_id=auth_id, acct_type='fxpractice')
 
 getPositions('EUR_USD', acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
+
+
+pairs <- c('AUD_CAD', 'EUR_USD', 'USD_JPY', 'NZD_USD', 'GBP_USD', 'EUR_CAD', 'USD_CAD', 'USD_CHF')
+for(this.pair in pairs) {
+  closeAllTrades('EUR_USD', acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
+  closeAllTrades('EUR_USD', acct=acct_buy, auth_id=auth_id, acct_type=acct_type)
+}
