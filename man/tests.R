@@ -32,6 +32,6 @@ getPositions('EUR_USD', acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
 
 pairs <- c('AUD_CAD', 'EUR_USD', 'USD_JPY', 'NZD_USD', 'GBP_USD', 'EUR_CAD', 'USD_CAD', 'USD_CHF')
 for(this.pair in pairs) {
-  closeAllTrades('EUR_USD', acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
-  closeAllTrades('EUR_USD', acct=acct_buy, auth_id=auth_id, acct_type=acct_type)
+  closeAllTrades(this.pair, acct=acct_sell, auth_id=auth_id, acct_type=acct_type)
+  closeAllTrades(this.pair, acct=acct_buy, auth_id=auth_id, acct_type=acct_type)
 }
