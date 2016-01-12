@@ -20,7 +20,7 @@ getEquity <- function(acct, auth_id, acct_type)
       out <- content(http)$balance
       return(out)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getEquity() | ')
       Sys.sleep(.5)
     }
   }
@@ -46,7 +46,7 @@ getPrice <- function(instrument, auth_id, acct_type)
       out <- fromJSON(content(http, type='text'))$prices
       return(out)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getPrice() | ')
       Sys.sleep(.5)
     }
   }
@@ -69,7 +69,7 @@ getPipValue <- function(instrument, acct, auth_id, acct_type)
       out <- fromJSON(content(http, type='text'))$instruments$pip
       return(as.numeric(out))
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getPipValue() | ')
       Sys.sleep(.5)
     }
   }
@@ -92,7 +92,7 @@ getPositions <- function(instrument, acct, auth_id, acct_type)
       out <- fromJSON(content(http, type='text'))$positions
       return(out)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getPositions() | ')
       Sys.sleep(.5)
     }
   }
@@ -123,7 +123,7 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type)
       trades <- xts(trades, order.by=time)
       return(trades)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getOpenTrades() | ')
       Sys.sleep(.5)
     }
   }
@@ -145,12 +145,12 @@ closeAllTrades <- function(instrument, acct, auth_id, acct_type)
       closed <- fromJSON(content(http, type='text'))
       return(closed)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::closeAllTrades() | ')
       Sys.sleep(.5)
     }
   }
   print(http)
-  stop("Couldn't get the proper response from Oanda server: roanda::closeTrade()")
+  stop("Couldn't get the proper response from Oanda server: roanda::closeAllTrades()")
 }
 
 ##########################
@@ -167,7 +167,7 @@ closeTrade <- function(orderID, acct, auth_id, acct_type)
       closed <- fromJSON(content(http, type='text'))
       return(closed)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::closeTrade() | ')
       Sys.sleep(.5)
     }
   }
@@ -198,7 +198,7 @@ getPastOrders <- function(instrument,
     } else if(http$status_code==53){ # This request has a 60 sec cooldown
       Sys.sleep(61)
     } else {
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getPastOrders() | ')
       Sys.sleep(.5)
     }
   }
@@ -245,7 +245,7 @@ pastCandles <- function(instrument,
       return(ohlc_xts)
 
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::pastCandles() | ')
       Sys.sleep(.5)
     }
   }
@@ -301,7 +301,7 @@ getCandlesByTime <- function(instrument,
       ohlc_xts <- xts(ohlc, order.by=dates)
       return(ohlc_xts)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::getCandlesByTime() | ')
       Sys.sleep(.5)
     }
   }
@@ -372,10 +372,10 @@ marketOrder <- function(instrument,
       order <- fromJSON(content(http, type='text'))
       return(order)
     } else{
-      cat(warn_for_status(http), '| ')
+      cat(warn_for_status(http), 'roanda::marketOrder() | ')
       Sys.sleep(1)
     }
   }
   print(http)
-  stop("Couldn't get the proper response from Oanda server: roanda::pastCandlesByTime()")
+  stop("Couldn't get the proper response from Oanda server: roanda::marketOrder()")
 } 
