@@ -1,4 +1,4 @@
-library(RCurl)
+library(httr)
 library(jsonlite)
 library(xts)
 
@@ -14,8 +14,18 @@ getEquity <- function(acct, auth_id, acct_type)
   auth <- c(Authorization=paste('Bearer', auth_id))
   
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/', acct)
-  equity <- fromJSON(getURL(url, httpheader=auth))$balance
-  return(equity)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- content(http)$balance
+      return(out)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getEquity()")
 }
 
 
@@ -26,11 +36,22 @@ getPrice <- function(instrument, auth_id, acct_type)
 {
   ##  Athorization
   auth <- c(Authorization=paste('Bearer', auth_id))
+  
   ##  Get Current price:
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/prices?instruments=', 
                 instrument)
-  current_price <- fromJSON(getURL(url, httpheader=auth))
-  return(current_price$prices)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text'))$prices
+      return(out)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getPrice()")
 }
 
 
@@ -42,8 +63,18 @@ getPipValue <- function(instrument, acct, auth_id, acct_type)
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/instruments?accountId=',
                 acct, '&instruments=', instrument)
-  pipval <- fromJSON(getURL(url, httpheader=auth))
-  return(as.numeric(pipval$instruments$pip))
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text'))$instruments$pip
+      return(as.numeric(out))
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getPipValue()")
 }
 
 
@@ -55,8 +86,18 @@ getPositions <- function(instrument, acct, auth_id, acct_type)
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/positions?instrument=', instrument)
-  orders <- fromJSON(getURL(url, httpheader=auth))$positions
-  return(orders)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text'))$positions
+      return(out)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getPositions()")
 }
 
 #######################
@@ -67,19 +108,28 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type)
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/trades?instrument=', instrument)
-  trades <- fromJSON(getURL(url, httpheader=auth))$trades
-  # If no trades open, exit
-  if(length(trades)==0) return(trades)
-  # convert to xts
-  trades$side[trades$side=='buy'] <- 1
-  trades$side[trades$side=='sell'] <- -1
-  trades$side <- as.integer(trades$side)
-  time <- as.POSIXct(trades$time, format='%Y-%m-%dT%H:%M:%S')
-  trades <- subset(trades, select= -c(instrument, time))
-  trades <- xts(trades, order.by=time)
-  return(trades)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      trades <- fromJSON(content(http, type='text'))$trades
+      # If no trades open, exit
+      if(length(trades)==0) return(trades)
+      # convert to xts
+      trades$side[trades$side=='buy'] <- 1
+      trades$side[trades$side=='sell'] <- -1
+      trades$side <- as.integer(trades$side)
+      time <- as.POSIXct(trades$time, format='%Y-%m-%dT%H:%M:%S')
+      trades <- subset(trades, select= -c(instrument, time))
+      trades <- xts(trades, order.by=time)
+      return(trades)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getOpenTrades()")
 }
-
 
 ####################
 ##  Close Trades  ##
@@ -88,18 +138,41 @@ closeAllTrades <- function(instrument, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
-                acct, '/positions/', instrument) 
-  closed <- fromJSON(getURL(url, httpheader=auth, customrequest='DELETE'))
-  return(closed)
+                acct, '/positions/', instrument)
+  for(i in 1:15) {
+    http <- DELETE(url, add_headers(auth))
+    if(http$status_code==200) {
+      closed <- fromJSON(content(http, type='text'))
+      return(closed)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::closeTrade()")
 }
 
+##########################
+##  Close Single Trade  ##
+##########################
 closeTrade <- function(orderID, acct, auth_id, acct_type)
 {
   auth <- c(Authorization=paste('Bearer', auth_id))
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
-                acct, '/trades/', orderID) 
-  closed <- fromJSON(getURL(url, httpheader=auth, customrequest='DELETE'))
-  return(closed)
+                acct, '/trades/', orderID)
+  for(i in 1:15) {
+    http <- DELETE(url, add_headers(auth))
+    if(http$status_code==200) {
+      closed <- fromJSON(content(http, type='text'))
+      return(closed)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::closeTrade()")
 }
   
 #########################
@@ -117,8 +190,20 @@ getPastOrders <- function(instrument,
                     '&count=', count)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/transactions?', options) 
-  orders <- fromJSON(getURL(url, httpheader=auth))$transactions
-  return(orders)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text'))$transactions
+      return(out)
+    } else if(http$status_code==53){ # This request has a 60 sec cooldown
+      Sys.sleep(61)
+    } else {
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getPositions()")
 }
 ##########################
 ##  Get Past N Candles  ##
@@ -132,7 +217,6 @@ pastCandles <- function(instrument,
                         acct_type
 )
 {
-  require(xts)
   ##  Athorization
   auth <- c(Authorization=paste('Bearer', auth_id))
   
@@ -142,21 +226,31 @@ pastCandles <- function(instrument,
                     '&candleFormat=', candleFormat
   )
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/candles?', options)
-  
-  hist <- fromJSON(getURL(url, httpheader=auth))$candles
-  hist <- hist[hist$complete==TRUE, ]
-  if(isAsk){
-    ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
-                       Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)
-  } else {
-    ohlc <-   data.frame(Open=hist$openBid, High=hist$highBid, 
-                         Low=hist$lowBid, Close=hist$closeBid, Volume=hist$volume)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      hist <- fromJSON(content(http, type='text'))$candles
+      hist <- hist[hist$complete==TRUE, ]
+      if(isAsk){
+        ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
+                           Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)
+      } else {
+        ohlc <-   data.frame(Open=hist$openBid, High=hist$highBid, 
+                             Low=hist$lowBid, Close=hist$closeBid, Volume=hist$volume)
+      }
+      
+      ##  Convert to XTS object
+      dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+      ohlc_xts <- xts(ohlc, order.by=dates)
+      return(ohlc_xts)
+
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
   }
-  
-  ##  Convert to XTS object
-  dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
-  ohlc_xts <- xts(ohlc, order.by=dates)
-  return(ohlc_xts)
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::pastCandles()")
 }
 
 ###########################
@@ -188,38 +282,37 @@ getCandlesByTime <- function(instrument,
                     '&candleFormat=', candleFormat
   )
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/candles?', options)
-  for(iter in 1:20) {
-    hist <- getURL(url, httpheader=auth)
-    if(hist=='') next # We bad, start next loop
-    hist <- fromJSON(hist)$candles
-    hist <- hist[hist$complete==TRUE, ]
-    if(NROW(hist)!=0) break # We good, break loop
-    Sys.sleep(.5)
-  }
-  if(NROW(hist)==0) stop('Zero candles return 20 times in a row...')
-  if(isAsk){
-    ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
-                       Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)
-  } else {
-    ohlc <-   data.frame(Open=hist$openBid, High=hist$highBid, 
-                         Low=hist$lowBid, Close=hist$closeBid, Volume=hist$volume)
-  }
   
-  ##  Convert to XTS object
-  tryCatch({
-    dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
-  }, error=function(e) {
-    cat(hist)
-    stop('hist$time cant be converted to as.POSIXct for some reason in roanda::getCandlesByTime()')
-  })
-  ohlc_xts <- xts(ohlc, order.by=dates)
-  return(ohlc_xts)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      hist <- fromJSON(content(http, type='text'))$candles
+      hist <- hist[hist$complete==TRUE, ]
+      if(isAsk){
+        ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
+                           Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)
+      } else {
+        ohlc <-   data.frame(Open=hist$openBid, High=hist$highBid, 
+                             Low=hist$lowBid, Close=hist$closeBid, Volume=hist$volume)
+      }
+      
+      ##  Convert to XTS object
+      dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
+      ohlc_xts <- xts(ohlc, order.by=dates)
+      return(ohlc_xts)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::pastCandlesByTime()")
 }
 ##########################
 ##  Place Market Order  ##
 ##########################
 marketOrder <- function(instrument,
-                        units=10000, #number of units to buy
+                        units=1000, #number of units to buy
                         side, #buy, sell
                         slippage=4, ## (pips)
                         SL=10, ## pips
@@ -264,21 +357,25 @@ marketOrder <- function(instrument,
   ##  Past together the proper URL
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/orders')
+  body <- list(instrument=instrument,
+               units=units,
+               side=side,
+               type=type,
+               lowerBound=slipDown,
+               upperBound=slipUp,
+               takeProfit=takeProfit,
+               stopLoss=stopLoss)
   
-  ##  Place the order
-  order <- fromJSON(
-    postForm(url,
-             style='POST',
-             .params=c(instrument=instrument,
-                       units=units,
-                       side=side,
-                       type=type,
-                       lowerBound=slipDown,
-                       upperBound=slipUp,
-                       takeProfit=takeProfit,
-                       stopLoss=stopLoss), 
-             .opts=list(httpheader=auth))
-  )
-  
-  return(order)
-}
+  for(i in 1:15) {
+    http <- POST(url=url, add_headers(auth), body=body, encode='form')
+    if(http$status_code==200) {
+      order <- fromJSON(content(http, type='text'))
+      return(order)
+    } else{
+      cat(warn_for_status(http), '| ')
+      Sys.sleep(1)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::pastCandlesByTime()")
+} 
