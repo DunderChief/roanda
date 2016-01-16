@@ -194,8 +194,13 @@ getPastOrders <- function(instrument,
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
       out <- fromJSON(content(http, type='text'))$transactions
+      # Need to deal with a strange column that is actually 2 columns
+      tradeOpened <- out$tradeOpened
+      out$tradeOpened_id <- tradeOpened$id
+      out$tradeOpened_units <- tradeOpened$units
+      out <- subset(out, select=-tradeOpened)
       return(out)
-    } else if(http$status_code==53){ # This request has a 60 sec cooldown
+    } else if(http$status_code==53 | http$status_code==429){ # This request has a 60 sec cooldown
       Sys.sleep(61)
     } else {
       cat(warn_for_status(http), 'roanda::getPastOrders() | ')
