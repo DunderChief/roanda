@@ -1,0 +1,1 @@
+#### This R package is a wrapper to Oanda's REST API for Forex trading. It is curretly indended for personal use only.
