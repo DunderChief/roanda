@@ -305,6 +305,8 @@ getCandlesByTime <- function(instrument,
       dates <- as.POSIXct(hist$time, format='%Y-%m-%dT%H:%M:%S', tz='UTC')
       ohlc_xts <- xts(ohlc, order.by=dates)
       return(ohlc_xts)
+    } else if(http$status_code==204) { # No content
+      return(NULL)
     } else{
       cat(warn_for_status(http), 'roanda::getCandlesByTime() | ')
       Sys.sleep(.5)

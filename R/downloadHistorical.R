@@ -32,8 +32,8 @@ getHistorical <- function(
                      'W' = 'week')
   
   # this is meant to break the total time into bins with 5000 points in between
-  if(!is.POSIXt(start.time)) start.time <- as.POSIXct(start.time)
-  if(!is.POSIXt(end.time)) end.time <- as.POSIXct(end.time)
+  start.time <- as.POSIXct(start.time)
+  end.time <- as.POSIXct(end.time)
   
   start_dates <- seq.POSIXt(start.time, end.time, by=paste(5000*gran.num, gran.time))
   
