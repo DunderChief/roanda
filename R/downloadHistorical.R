@@ -3,7 +3,80 @@ library(quantmod)
 library(lubridate)
 library(foreach)
 
+# Historacial Commitment of traders CFTC
+getCommitmentOfTraders <- function(instrument='EUR_USD',
+                                   acct, auth_id, acct_type) {
+  auth <- c(Authorization=paste('Bearer', auth_id))
+  
+  url <- paste0('https://api-', acct_type, '.oanda.com/labs/v1/commitments_of_traders?', 
+                paste0('instrument=', instrument))
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text', encoding='UTF-8'))[[1]]
+      out$date <- as.POSIXct(out$date, origin="1970-01-01")
+      colnames(out) <- c('unit', 'NonCommercialShort', 'date', 'price',
+                         'NonCommercialLong', 'OverallInterest')
+      return(out)
+    } else{
+      cat(warn_for_status(http), 'roanda::getEconomicEvents() | ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getEquity()")
+}
+# Get Economic Events
+getEconomicEvents <- function(instrument=NA, period=31536000,
+                              acct, auth_id, acct_type){
+  ##  Athorization
+  auth <- c(Authorization=paste('Bearer', auth_id))
+  
+  url <- paste0('https://api-', acct_type, '.oanda.com/labs/v1/calendar?', 
+                ifelse(is.na(instrument), '', 
+                       paste0('instrument=', instrument, '&')),
+                'period=', period)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text'))
+      out$timestamp <- as.POSIXct(out$timestamp, origin="1970-01-01")
+      return(out)
+    } else{
+      cat(warn_for_status(http), 'roanda::getEconomicEvents() | ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getEquity()")
+}
 
+# Historical position ratios
+getPositionRatios <- function(instrument='EUR_USD', period=31536000,
+                              acct, auth_id, acct_type){
+  auth <- c(Authorization=paste('Bearer', auth_id))
+  
+  url <- paste0('https://api-', acct_type, 
+                '.oanda.com/labs/v1/historical_position_ratios?', 
+                paste0('instrument=', instrument, '&'),
+                'period=', period)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- fromJSON(content(http, type='text', encoding='UTF-8'))
+      out <- data.frame(out[[1]][[1]][[2]])
+      colnames(out) <- c('timestamp', 'LongPosRatio', 'ExchangeRate')
+      out$timestamp <- as.POSIXct(out$timestamp, origin="1970-01-01")
+      return(out)
+    } else{
+      cat(warn_for_status(http), 'roanda::getEconomicEvents() | ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getEquity()")
+}
+# Historical candles
 getHistorical <- function(
   instrument='EUR_USD',
   start.time=Sys.Date() - 5,
@@ -93,3 +166,4 @@ updateHistorical <- function(dat.xts, auth_id, acct, acct_type,
   updated <- updated[!duplicated(xts:::index.xts(updated)),]
   return(updated)
 }
+
