@@ -2,10 +2,9 @@
 
 # Return whether the current time is in undesireable trading hours
 # ________________________________________________________________
-isWeekend <- function() {
-  systime <- Sys.time()
-  this.day <- wday(systime)
-  this.hour <- hour(systime)
+isWeekend <- function(time=Sys.time()) {
+  this.day <- wday(time)
+  this.hour <- hour(time)
   return(this.day %in% c(1,7) |           # Sat. or Sun. or...
          (this.day==6 & this.hour > 13) | # Fridays after 9am
          (this.day==2 & this.hour < 7)    # Monday before 3 am
