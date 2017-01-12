@@ -39,7 +39,7 @@ getEconomicEvents <- function(instrument=NA, period=31536000,
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      out <- fromJSON(content(http, type='text'))
+      out <- fromJSON(content(http, encoding='UTF-8', type='text'))
       out$timestamp <- as.POSIXct(out$timestamp, origin="1970-01-01")
       return(out)
     } else{

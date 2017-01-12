@@ -43,7 +43,7 @@ getPrice <- function(instrument, auth_id, acct_type)
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      out <- fromJSON(content(http, type='text'))$prices
+      out <- fromJSON(content(http, encoding='UTF-8', type='text'))$prices
       return(out)
     } else{
       cat(warn_for_status(http), 'roanda::getPrice() | ')
@@ -66,7 +66,7 @@ getPipValue <- function(instrument, acct, auth_id, acct_type)
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      out <- fromJSON(content(http, type='text'))$instruments$pip
+      out <- fromJSON(content(http, encoding='UTF-8', type='text'))$instruments$pip
       return(as.numeric(out))
     } else{
       cat(warn_for_status(http), 'roanda::getPipValue() | ')
@@ -89,7 +89,7 @@ getPositions <- function(instrument, acct, auth_id, acct_type)
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      out <- fromJSON(content(http, type='text'))$positions
+      out <- fromJSON(content(http, encoding='UTF-8', type='text'))$positions
       return(out)
     } else{
       cat(warn_for_status(http), 'roanda::getPositions() | ')
@@ -111,7 +111,7 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type)
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      trades <- fromJSON(content(http, type='text'))$trades
+      trades <- fromJSON(content(http, encoding='UTF-8', type='text'))$trades
       # If no trades open, exit
       if(length(trades)==0) return(trades)
       # convert to xts
@@ -142,7 +142,7 @@ closeAllTrades <- function(instrument, acct, auth_id, acct_type)
   for(i in 1:15) {
     http <- DELETE(url, add_headers(auth))
     if(http$status_code==200) {
-      closed <- fromJSON(content(http, type='text'))
+      closed <- fromJSON(content(http, encoding='UTF-8', type='text'))
       return(closed)
     } else{
       cat(warn_for_status(http), 'roanda::closeAllTrades() | ')
@@ -164,7 +164,7 @@ closeTrade <- function(orderID, acct, auth_id, acct_type)
   for(i in 1:15) {
     http <- DELETE(url, add_headers(auth))
     if(http$status_code==200) {
-      closed <- fromJSON(content(http, type='text'))
+      closed <- fromJSON(content(http, encoding='UTF-8', type='text'))
       return(closed)
     } else{
       cat(warn_for_status(http), 'roanda::closeTrade() | ')
@@ -193,7 +193,7 @@ getPastOrders <- function(instrument,
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      out <- fromJSON(content(http, type='text'))$transactions
+      out <- fromJSON(content(http, encoding='UTF-8', type='text'))$transactions
       # Need to deal with a strange column that is actually 2 columns
       tradeOpened <- out$tradeOpened
       out$tradeOpened_id <- tradeOpened$id
@@ -234,7 +234,7 @@ pastCandles <- function(instrument,
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      hist <- fromJSON(content(http, type='text'))$candles
+      hist <- fromJSON(content(http, encoding='UTF-8', type='text'))$candles
       hist <- hist[hist$complete==TRUE, ]
       if(isAsk){
         ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
@@ -291,7 +291,7 @@ getCandlesByTime <- function(instrument,
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      hist <- fromJSON(content(http, type='text'))$candles
+      hist <- fromJSON(content(http, encoding='UTF-8', type='text'))$candles
       hist <- hist[hist$complete==TRUE, ]
       if(isAsk){
         ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
@@ -376,7 +376,7 @@ marketOrder <- function(instrument,
   for(i in 1:15) {
     http <- POST(url=url, add_headers(auth), body=body, encode='form')
     if(http$status_code==200) {
-      order <- fromJSON(content(http, type='text'))
+      order <- fromJSON(content(http, encoding='UTF-8', type='text'))
       return(order)
     } else{
       cat(warn_for_status(http), 'roanda::marketOrder() | ')
