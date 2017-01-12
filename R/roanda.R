@@ -17,7 +17,7 @@ getEquity <- function(acct, auth_id, acct_type)
   for(i in 1:15) {
     http <- GET(url=url, add_headers(auth))
     if(http$status_code==200) {
-      out <- content(http)$balance
+      out <- content(http, encoding='UTF-8')$balance
       return(out)
     } else{
       cat(warn_for_status(http), 'roanda::getEquity() | ')
