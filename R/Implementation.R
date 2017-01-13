@@ -85,7 +85,7 @@ getUnits <- function(instrument, current_price, stoploss, risk,
   cat('Units:', units, '| equity |', eq, '| dollars_per_pip_to_risk |', dollars_per_pip_to_risk, 
       '|UnitsPerDoll|', units_per_dollar, '|class(units)|', class(units))
   # Set a cap of 1 million units
-  if(units > 50000) stop('Unit cap of 50000 reached...')
+  if(units > 1e6) stop('Unit cap of 50000 reached...')
   if(units < 1000) stop('Number of units pitifly small...')
   return(as.integer(units))
 }
