@@ -42,7 +42,7 @@ updateCandles <- function(hist, instrument='EUR_USD', granularity='H1',
                         'H' = 60*60,
                         'D' = 60*60*24,
                         'W' = 60*60*24*7)
-  # Some Oanda granularity have no int, there fore need to skip
+  # Some Oanda granularity have no int, therefore need to skip
   if(!is.na(timeint)) period_secs <- period_secs * timeint
   newCandleTime <- align.time(Sys.time(), period_secs, drop.time=FALSE)
   
@@ -85,7 +85,7 @@ getUnits <- function(instrument, current_price, stoploss, risk,
   cat('Units:', units, '| equity |', eq, '| dollars_per_pip_to_risk |', dollars_per_pip_to_risk, 
       '|UnitsPerDoll|', units_per_dollar, '|class(units)|', class(units))
   # Set a cap of 1 million units
-  if(units > 1e6) stop('Unit cap of 50000 reached...')
+  if(units > 1e6) stop('Unit cap of 1 million reached...')
   if(units < 1000) stop('Number of units pitifly small...')
   return(as.integer(units))
 }
