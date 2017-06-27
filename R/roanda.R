@@ -15,7 +15,11 @@ getEquity <- function(acct, auth_id, acct_type)
   
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/', acct)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {
+        Sys.sleep(1)
+        next
+      }
+    )
     if(http$status_code==200) {
       out <- content(http, encoding='UTF-8')$balance
       return(out)
@@ -38,12 +42,16 @@ getAccount <- function(acct, auth_id, acct_type)
   
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/', acct)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       out <- content(http, encoding='UTF-8')
       return(data.frame(out))
     } else{
-      cat(warn_for_status(http), 'roanda::getEquity() | ')
+      cat(warn_for_status(http), 'roanda::getAccount() | ')
       Sys.sleep(.5)
     }
   }
@@ -62,7 +70,11 @@ getPrice <- function(instrument, auth_id, acct_type)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/prices?instruments=', 
                 instrument)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       out <- fromJSON(content(http, encoding='UTF-8', type='text'))$prices
       return(out)
@@ -85,7 +97,11 @@ getPipValue <- function(instrument, acct, auth_id, acct_type)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/instruments?accountId=',
                 acct, '&instruments=', instrument)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       out <- fromJSON(content(http, encoding='UTF-8', type='text'))$instruments$pip
       return(as.numeric(out))
@@ -108,13 +124,18 @@ getPositions <- function(instrument, acct, auth_id, acct_type)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/positions?instrument=', instrument)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {
+        Sys.sleep(1)
+        next
+      }
+    )
+      
     if(http$status_code==200) {
       out <- fromJSON(content(http, encoding='UTF-8', type='text'))$positions
       return(out)
     } else{
       cat(warn_for_status(http), 'roanda::getPositions() | ')
-      Sys.sleep(.5)
+      Sys.sleep(1)
     }
   }
   print(http)
@@ -130,7 +151,11 @@ getOpenTrades <- function(instrument, acct, auth_id, acct_type)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/trades?instrument=', instrument)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       trades <- fromJSON(content(http, encoding='UTF-8', type='text'))$trades
       # If no trades open, exit
@@ -161,7 +186,11 @@ closeAllTrades <- function(instrument, acct, auth_id, acct_type)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/positions/', instrument)
   for(i in 1:15) {
-    http <- DELETE(url, add_headers(auth))
+    http <- tryCatch(DELETE(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       closed <- fromJSON(content(http, encoding='UTF-8', type='text'))
       return(closed)
@@ -183,7 +212,11 @@ closeTrade <- function(orderID, acct, auth_id, acct_type)
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/trades/', orderID)
   for(i in 1:15) {
-    http <- DELETE(url, add_headers(auth))
+    http <- tryCatch(DELETE(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       closed <- fromJSON(content(http, encoding='UTF-8', type='text'))
       return(closed)
@@ -212,7 +245,11 @@ getPastOrders <- function(instrument,
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/',
                 acct, '/transactions?', options) 
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       out <- fromJSON(content(http, encoding='UTF-8', type='text'))$transactions
       # Need to deal with a strange column that is actually 2 columns
@@ -254,7 +291,11 @@ pastCandles <- function(instrument,
   )
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/candles?', options)
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       hist <- fromJSON(content(http, encoding='UTF-8', type='text'))$candles
       if(only_complete){
@@ -313,7 +354,11 @@ getCandlesByTime <- function(instrument,
   url <- paste0('https://api-', acct_type, '.oanda.com/v1/candles?', options)
   
   for(i in 1:15) {
-    http <- GET(url=url, add_headers(auth))
+    http <- tryCatch(GET(url=url, add_headers(auth)), error=function(e) {         
+        Sys.sleep(1)         
+        next       
+      }     
+    )
     if(http$status_code==200) {
       hist <- fromJSON(content(http, encoding='UTF-8', type='text'))$candles
       hist <- hist[hist$complete==TRUE, ]
@@ -398,7 +443,12 @@ marketOrder <- function(instrument,
                stopLoss=stopLoss)
   
   for(i in 1:15) {
-    http <- POST(url=url, add_headers(auth), body=body, encode='form')
+    http <- tryCatch(POST(url=url, add_headers(auth), body=body, encode='form'),
+                     error=function(e) {         
+                       Sys.sleep(1)         
+                       next       
+                     }     
+    )
     if(http$status_code==200) {
       order <- fromJSON(content(http, encoding='UTF-8', type='text'))
       return(order)
