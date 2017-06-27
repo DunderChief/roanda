@@ -85,7 +85,8 @@ getHistorical <- function(
   acct,
   auth_id,
   acct_type,
-  isAsk=TRUE)
+  isAsk=TRUE,
+  only_complete=TRUE)
 {
   
   ##  We want to get the 30 second data from July 1, 2013 - July 12, 2014,
@@ -125,7 +126,8 @@ getHistorical <- function(
     end.f <- gsub(':', '%3A', end.f)
 
     out <- getCandlesByTime(instrument=instrument, granularity=granularity, isAsk=isAsk,
-                            start=start.f, end=end.f, auth_id=auth_id, acct_type=acct_type)
+                            start=start.f, end=end.f, auth_id=auth_id, acct_type=acct_type,
+                            only_complete=only_complete)
     Sys.sleep(0.1)
     return(as.data.frame(out))
   }
@@ -144,7 +146,7 @@ getHistorical <- function(
 # Takes an xts object and downloads appends new candles up to current date
 updateHistorical <- function(dat.xts, auth_id, acct, acct_type, 
                              instrument='EUR_USD', granularity='H1', 
-                             isAsk=TRUE, start) {
+                             isAsk=TRUE, start, only_complete=TRUE) {
   library(roanda)
   # Subtract one day to avoid 00:00:00 where there may be no candles available yet
   if(missing(start)){
@@ -157,7 +159,8 @@ updateHistorical <- function(dat.xts, auth_id, acct, acct_type,
                            auth_id=auth_id,
                            acct=acct,
                            acct_type=acct_type,
-                           isAsk=isAsk)
+                           isAsk=isAsk,
+                           only_complete=only_complete)
   if(NCOL(newdata)==1){
     warning('No candles returned for this time period, returning original dataset.')
     return(dat.xts)
