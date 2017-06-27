@@ -28,7 +28,28 @@ getEquity <- function(acct, auth_id, acct_type)
   stop("Couldn't get the proper response from Oanda server: roanda::getEquity()")
 }
 
-
+  ########################
+ ##  Get Account Info  ##
+########################
+getAccount <- function(acct, auth_id, acct_type) 
+{
+  ##  Athorization
+  auth <- c(Authorization=paste('Bearer', auth_id))
+  
+  url <- paste0('https://api-', acct_type, '.oanda.com/v1/accounts/', acct)
+  for(i in 1:15) {
+    http <- GET(url=url, add_headers(auth))
+    if(http$status_code==200) {
+      out <- content(http, encoding='UTF-8')
+      return(data.frame(out))
+    } else{
+      cat(warn_for_status(http), 'roanda::getEquity() | ')
+      Sys.sleep(.5)
+    }
+  }
+  print(http)
+  stop("Couldn't get the proper response from Oanda server: roanda::getEquity()")
+}
 #################
 ##  Get Price  ## 
 #################
