@@ -334,7 +334,8 @@ getCandlesByTime <- function(instrument,
                              candleFormat='bidask',
                              isAsk=TRUE, ##  Do you want the bid or ask prices
                              auth_id,
-                             acct_type
+                             acct_type,
+                             only_complete=TRUE
 )
 {
   
@@ -361,7 +362,9 @@ getCandlesByTime <- function(instrument,
     )
     if(http$status_code==200) {
       hist <- fromJSON(content(http, encoding='UTF-8', type='text'))$candles
-      hist <- hist[hist$complete==TRUE, ]
+      if(only_complete){
+        hist <- hist[hist$complete==TRUE, ]
+      }
       if(isAsk){
         ohlc <- data.frame(Open=hist$openAsk, High=hist$highAsk, 
                            Low=hist$lowAsk, Close=hist$closeAsk, Volume=hist$volume)

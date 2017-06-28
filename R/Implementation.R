@@ -12,8 +12,8 @@ isWeekend <- function(time=Sys.time()) {
 }
 
 
-# Return whether there's a fresh candle on my timescale
-# _____________________________________________________
+# Return whether there's a fresh candle on my timescale, will wait otherwise
+# ___________________________________________________________________________
 updateCandles <- function(hist, instrument='EUR_USD', granularity='H1', 
                           acct, auth_id, acct_type) {
   # If historical data not supplied, get some
