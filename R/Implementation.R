@@ -7,7 +7,7 @@ isWeekend <- function(time=Sys.time()) {
   this.hour <- hour(time)
   return(this.day %in% c(1,7) |           # Sat. or Sun. or...
          (this.day==6 & this.hour > 13) | # Fridays after 9am
-         (this.day==2 & this.hour < 7)    # Monday before 3 am
+         (this.day==2 & this.hour < 10)    # Monday before 6 am
   )   
 }
 
